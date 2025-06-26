@@ -26,7 +26,7 @@
     <textarea id="markdownOutput" placeholder="Markdown erscheint hier …" readonly></textarea>
 
     <h3>Gerenderte Tabelle:</h3>
-    <div id="htmlTable"></div>
+    <div id="htmlTable"><em>Hier erscheint nach dem Klick die gerenderte Tabelle …</em></div>
 
 <script>
 (function(){
@@ -98,7 +98,7 @@
         (data||[]).forEach(function(b){
             if(b.mapping&&b.mapping.properties){rows=rows.concat(extractMappings(b.mapping.properties));}
         });
-        var md="| Quellfeld | Zielfeld (CDP) | Transformation |\n|---|---|---|\n";
+        var md="| Quellfeld| Zielfeld (CDP) | Transformation |\n|---|---|---|\n";
         rows.forEach(function(r){md+="| `"+r[0]+"` | `"+r[1]+"` | "+r[2]+" |\n";});
         document.getElementById("markdownOutput").value=md;
 

@@ -2,25 +2,31 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>JSON Mapping → Markdown Tabelle</title>
+    <title>JSON Mapping → Markdown & HTML Tabelle</title>
     <style>
         body{font-family:system-ui,Arial,sans-serif;margin:2rem;max-width:820px}
         textarea{width:100%;height:180px;padding:.5rem;font-family:monospace;border:1px solid #ccc;border-radius:8px}
         button{margin-top:.8rem;padding:.6rem 1rem;border-radius:8px;border:none;background:#2563eb;color:#fff;font-size:1rem;cursor:pointer}
         button:hover{background:#1d4ed8}
         h2{margin-bottom:.5rem}
+        table{width:100%;border-collapse:collapse;margin-top:.5rem}
+        th,td{border:1px solid #ccc;padding:4px;text-align:left}
+        th{background:#f5f5f5}
     </style>
 </head>
 <body>
-    <h2>JSON Mapping → Markdown Tabelle</h2>
+    <h2>JSON Mapping → Markdown und HTML Tabelle</h2>
 
-    <label for="jsonInput">JSON-Mapping einfügen:</label>
-    <textarea id="jsonInput" placeholder="JSON hier einfügen …"></textarea>
+    <label for="jsonInput">JSON‑Mapping einfügen:</label>
+    <textarea id="jsonInput" placeholder="JSON hier einfügen …"></textarea>
 
-    <button id="convertBtn">Zu Markdown konvertieren</button>
+    <button id="convertBtn">Tabelle erzeugen</button>
 
-    <h3>Markdown-Ausgabe:</h3>
-    <textarea id="markdownOutput" placeholder="Markdown erscheint hier …" readonly></textarea>
+    <h3>Markdown‑Ausgabe:</h3>
+    <textarea id="markdownOutput" placeholder="Markdown erscheint hier …" readonly></textarea>
+
+    <h3>Gerenderte Tabelle:</h3>
+    <div id="htmlTable"></div>
 
 <script>
 (function(){
@@ -76,25 +82,40 @@
         return out;
     }
 
+    function escapeHtml(str){
+        return String(str)
+            .replace(/&/g,"&amp;")
+            .replace(/</g,"&lt;")
+            .replace(/>/g,"&gt;");
+    }
+
     function convertJsonToMarkdown(){
         var txt=document.getElementById("jsonInput").value.trim();
         if(!txt){alert("Bitte JSON eingeben.");return;}
         var data;
-        try{data=JSON.parse(txt);}catch(e){alert("JSON-Parsing-Fehler: "+e.message);return;}
+        try{data=JSON.parse(txt);}catch(e){alert("JSON‑Parsing‑Fehler: "+e.message);return;}
         var rows=[];
         (data||[]).forEach(function(b){
             if(b.mapping&&b.mapping.properties){rows=rows.concat(extractMappings(b.mapping.properties));}
         });
-        var md="| Quellfeld (CDC) | Zielfeld (CDP) | Transformation |\n|---|---|---|\n";
+        var md="| Quellfeld | Zielfeld (CDP) | Transformation |\n|---|---|---|\n";
         rows.forEach(function(r){md+="| `"+r[0]+"` | `"+r[1]+"` | "+r[2]+" |\n";});
         document.getElementById("markdownOutput").value=md;
+
+        // HTML‑Tabelle erzeugen
+        var html="<table><thead><tr><th>Quellfeld</th><th>Zielfeld (CDP)</th><th>Transformation</th></tr></thead><tbody>";
+        rows.forEach(function(r){
+            html+="<tr><td><code>"+escapeHtml(r[0])+"</code></td><td><code>"+escapeHtml(r[1])+"</code></td><td>"+escapeHtml(r[2])+"</td></tr>";
+        });
+        html+="</tbody></table>";
+        document.getElementById("htmlTable").innerHTML=html;
     }
 
-    // Für Inline-onclick weiterhin verfügbar machen
+    // Inline‑Kompatibilität & Event‑Listener
     window.convertJsonToMarkdown=convertJsonToMarkdown;
-    // Eleganter: Button-Listener
     document.getElementById("convertBtn").addEventListener("click",convertJsonToMarkdown);
 })();
 </script>
 </body>
 </html>
+
